@@ -22,6 +22,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -75,6 +77,13 @@ public final class NettyUtils {
 
     private NettyUtils() {
     }
-    public static boolean ClientACLAuth(Channel channel,String topic){ return channel.attr(NettyUtils.ATTR_KEY_clent_acl_status).get().containsKey(topic);}
+    //放内存进行校验acl 后期需要修改
+    public static boolean ClientACLAuth(Channel channel,String topic){
+        if (channel.attr(NettyUtils.ATTR_KEY_clent_acl_status).get()==null){
+            Map<String, String> map = new HashMap<String, String>();
+            channel.attr(NettyUtils.ATTR_KEY_clent_acl_status).set(map);
+            return false;
+        }
+        return channel.attr(NettyUtils.ATTR_KEY_clent_acl_status).get().containsKey(topic);}
     public static void ClientACLAuth(Channel channel,String topic,boolean status){ channel.attr(NettyUtils.ATTR_KEY_clent_acl_status).get().put(topic,topic);}
 }

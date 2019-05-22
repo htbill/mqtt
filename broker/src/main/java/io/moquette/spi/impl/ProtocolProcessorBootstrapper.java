@@ -129,13 +129,27 @@ public class ProtocolProcessorBootstrapper {
 
         LOG.info("Configuring message interceptors...");
         //拦截器
+        //集群拦截器
         List<InterceptHandler> observers = new ArrayList<>(embeddedObservers);
-        String interceptorClassName = props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_NAME);
-        if (interceptorClassName != null && !interceptorClassName.isEmpty()) {
-            InterceptHandler handler = loadClass(interceptorClassName, InterceptHandler.class, Server.class, server);
+        if (props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster) !=null && props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster).equals("true")){
+            InterceptHandler handler = loadClass("io.moquette.interception.hazelcastHandler.HazelcastInterceptHandler", InterceptHandler.class, Server.class, server);
             if (handler != null) {
                 observers.add(handler);
             }
+        }
+
+
+        //数据输出拦截器
+        String interceptorClassName = props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_NAME);
+        if (interceptorClassName != null && !interceptorClassName.isEmpty()) {
+            String[] hadlers=interceptorClassName.split(",");
+            for (String hadle_:hadlers) {
+                InterceptHandler handler = loadClass(hadle_, InterceptHandler.class, Server.class, server);
+                if (handler != null) {
+                    observers.add(handler);
+                }
+            }
+
         }
         BrokerInterceptor interceptor = new BrokerInterceptor(props, observers);
 

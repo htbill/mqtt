@@ -15,6 +15,7 @@
  */
 package io.moquette.server.netty.metrics;
 
+import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
@@ -46,6 +47,7 @@ public final class DropWizardMetricsHandler extends ChannelInboundHandlerAdapter
         this.publishesMetrics = metrics.meter("publish.requests");
         this.subscribeMetrics = metrics.meter("subscribe.requests");
         this.connectedClientsMetrics = metrics.counter("connect.num_clients");
+
 //        ConsoleReporter reporter = ConsoleReporter.forRegistry(metrics)
 //            .convertRatesTo(TimeUnit.SECONDS)
 //            .convertDurationsTo(TimeUnit.MILLISECONDS)

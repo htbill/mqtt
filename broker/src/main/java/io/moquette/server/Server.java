@@ -162,8 +162,12 @@ public class Server {
         if (handlerProp != null) {
             config.setProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_NAME, handlerProp);
         }
+        final String Cluster=System.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster);
+        if (Cluster!=null){
+            config.setProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster, Cluster);
+        }
         //启动集群通信
-        if (config.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_NAME) !=null && config.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_NAME).equals(HazelcastInterceptHandler.class.getCanonicalName())) {
+        if (config.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster) !=null && config.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster).equals("true")) {
             if (config.getProperty(BrokerConstants.HAZELCAST_CONFIGURATION) !=null){
                 Config hzconfig = null;
                 if (this.getClass().getClassLoader().getResource(config.getProperty(BrokerConstants.HAZELCAST_CONFIGURATION)) != null) {
