@@ -38,6 +38,7 @@ import io.netty.handler.codec.mqtt.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -152,7 +153,7 @@ public class ProtocolProcessor {
 
         LOG.debug("Initializing QoS publish handlers...");
         this.qos0PublishHandler = new Qos0PublishHandler(m_authorizator, m_messagesStore, m_interceptor,
-                this.messagesPublisher);
+            this.messagesPublisher);
         this.qos1PublishHandler = new Qos1PublishHandler(m_authorizator, m_messagesStore, m_interceptor,
                 this.connectionDescriptors, this.messagesPublisher);
         this.qos2PublishHandler = new Qos2PublishHandler(m_authorizator, subscriptions, m_messagesStore, m_interceptor,
@@ -205,7 +206,7 @@ public class ProtocolProcessor {
         return pub;
     }
 
-    public void processPublish(Channel channel, MqttPublishMessage msg) {
+    public void processPublish(Channel channel, MqttPublishMessage msg) throws UnsupportedEncodingException {
         final MqttQoS qos = msg.fixedHeader().qosLevel();
         final String clientId = NettyUtils.clientID(channel);
         LOG.info("Processing PUBLISH message. CId={}, topic={}, messageId={}, qos={}", clientId,
@@ -338,6 +339,7 @@ public class ProtocolProcessor {
     }
 
     public void processConnectionLost(String clientID, Channel channel) {
+        //设备掉线处理逻辑
         LOG.info("Lost connection with client <{}>", clientID);
         ConnectionDescriptor oldConnDescr = new ConnectionDescriptor(clientID, channel, true);
         connectionDescriptors.removeConnection(oldConnDescr);

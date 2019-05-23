@@ -27,11 +27,13 @@ public class ACLDBAuth implements IAuthorizatorPolicy {
     }
     @Override
     public boolean canWrite(Topic topic, String user, String client) {
+
+            return true;
+        /*
         if (topic == null || client == null) {
             LOG.info("username or password was null");
             return false;
         }
-
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         Connection conn = null;
@@ -76,12 +78,15 @@ public class ACLDBAuth implements IAuthorizatorPolicy {
             }
 
         }
-        return false;
+        return false;*/
     }
 
     @Override
     public boolean canRead(Topic topic, String user, String client) {
-        if (topic == null || client == null) {
+
+            return true;
+
+        /*if (topic == null || client == null) {
             LOG.info("username or password was null");
             return false;
         }
@@ -129,6 +134,6 @@ public class ACLDBAuth implements IAuthorizatorPolicy {
             }
 
         }
-        return false;
+        return false;*/
     }
 }

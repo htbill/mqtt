@@ -30,6 +30,8 @@ import io.moquette.interception.hazelcastHandler.HazelcastListener;
 import io.moquette.interception.hazelcastHandler.HazelcastMsg;
 import io.moquette.server.config.*;
 import io.moquette.server.netty.NettyAcceptor;
+import io.moquette.spi.Utils.DataStatistics;
+import io.moquette.spi.Utils.kafkaProducerMsg;
 import io.moquette.spi.impl.ProtocolProcessor;
 import io.moquette.spi.impl.ProtocolProcessorBootstrapper;
 import io.moquette.spi.impl.subscriptions.Subscription;
@@ -66,6 +68,18 @@ public class Server {
 
     private ScheduledExecutorService scheduler;
     private HazelcastInstance hazelcastInstance;
+    public HazelcastInstance getHazelcastInstance(){
+        return hazelcastInstance;
+    }
+    public void setHazelcastInstance(HazelcastInstance HazelcastInstance_)
+    {
+         hazelcastInstance=HazelcastInstance_;
+    }
+    public void listenOnHazelCastMsg(ConnectionDescriptorStore connectionDescriptors) {
+        HazelcastInstance hz = getHazelcastInstance();
+        ITopic<HazelcastMsg> topic = hz.getTopic("moquette");
+        topic.addMessageListener(new HazelcastListener(this,connectionDescriptors));
+    }
 
     public static void main(String[] args) throws Exception {
         final Server server = new Server();
@@ -150,39 +164,45 @@ public class Server {
 
     public void startServer(IConfig config, List<? extends InterceptHandler> handlers, ISslContextCreator sslCtxCreator,
                             IAuthenticator authenticator, IAuthorizatorPolicy authorizator) throws Exception {
+
         final long start = System.currentTimeMillis();
+
         if (handlers == null) {
             handlers = Collections.emptyList();
         }
         LOG.trace("Starting Moquette Server. MQTT message interceptors={}", getInterceptorIds(handlers));
 
         scheduler = Executors.newScheduledThreadPool(1);
-
-        final String handlerProp = System.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_NAME);
+        final String clustername = config.getProperty(BrokerConstants.clustername);
+        if (clustername == null) {
+            throw new Exception("clustername is not set");
+        }
+        BrokerConstants.cluster_name=clustername;
+        final String handlerProp = config.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_NAME);
         if (handlerProp != null) {
             config.setProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_NAME, handlerProp);
         }
-        final String Cluster=System.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster);
+        final String Cluster=config.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster);
         if (Cluster!=null){
             config.setProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster, Cluster);
         }
-        //启动集群通信
-        if (config.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster) !=null && config.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster).equals("true")) {
-            if (config.getProperty(BrokerConstants.HAZELCAST_CONFIGURATION) !=null){
-                Config hzconfig = null;
-                if (this.getClass().getClassLoader().getResource(config.getProperty(BrokerConstants.HAZELCAST_CONFIGURATION)) != null) {
-                    hzconfig = new ClasspathXmlConfig(config.getProperty(BrokerConstants.HAZELCAST_CONFIGURATION));
-                } else {
-                    hzconfig = new FileSystemXmlConfig(config.getProperty(BrokerConstants.HAZELCAST_CONFIGURATION));
-                }
-                LOG.info(String.format("starting server with hazelcast configuration file : %s",hzconfig));
-                hazelcastInstance = Hazelcast.newHazelcastInstance(hzconfig);
-            } else {
-                LOG.info("starting server with hazelcast default file");
-                hazelcastInstance = Hazelcast.newHazelcastInstance();
+        //查看是否有数据过滤
+        final String PassThrough=config.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_PassThrough);
+        if (PassThrough!=null){
+            config.setProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_PassThrough, PassThrough);
+            DataStatistics.PassThrough=PassThrough;
+            String kafkaservers=config.getProperty(BrokerConstants.Kafkaservers);
+            String topic =config.getProperty(BrokerConstants.KafkaTopic);
+            if (kafkaservers!=null && topic!=null){
+                //new kafkaProducerMsg(kafkaservers,topic);
+                LOG.info("kafkaProducerMsg init is secuess");
+            }else {
+                LOG.error("kafka parm is null please reset parm");
+                throw new Exception("kafka parm is null please reset parm");
             }
-            listenOnHazelCastMsg();
         }
+
+
 
         final String persistencePath = config.getProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME);
         LOG.debug("Configuring Using persistent store file, path={}", persistencePath);
@@ -281,14 +301,7 @@ public class Server {
         LOG.info("Removing MQTT message interceptor. InterceptorId={}", interceptHandler.getID());
         m_processor.removeInterceptHandler(interceptHandler);
     }
-    public HazelcastInstance getHazelcastInstance(){
-        return hazelcastInstance;
-    }
-    private void listenOnHazelCastMsg() {
-        HazelcastInstance hz = getHazelcastInstance();
-        ITopic<HazelcastMsg> topic = hz.getTopic("moquette");
-        topic.addMessageListener(new HazelcastListener(this));
-    }
+
 
     /**
      * Returns the connections manager of this broker.

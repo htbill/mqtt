@@ -19,9 +19,13 @@ package io.moquette;
 import java.io.File;
 
 public final class BrokerConstants {
+    public static final String clustername = "clustername";//
 
-    public static final String INTERCEPT_HANDLER_PROPERTY_NAME = "intercept.handler";
+    public static final String INTERCEPT_HANDLER_PROPERTY_NAME = "intercept.handler";//
     public static final String INTERCEPT_HANDLER_PROPERTY_Cluster="cluster";
+    public static final String INTERCEPT_HANDLER_PROPERTY_PassThrough="passthrough";
+    public static final String Kafkaservers="Kafkaservers";
+    public static final String KafkaTopic="KafkaTopic";
     public static final String BROKER_INTERCEPTOR_THREAD_POOL_SIZE = "intercept.thread_pool.size";
     public static final String PERSISTENT_STORE_PROPERTY_NAME = "persistent_store";
     public static final String AUTOSAVE_INTERVAL_PROPERTY_NAME = "autosave_interval";
@@ -88,6 +92,13 @@ public final class BrokerConstants {
     public static final String BUGSNAG_TOKEN_PROPERTY_NAME = "bugsnag.token";
 
     public static final String STORAGE_CLASS_NAME = "storage_class";
+    public static String cluster_name="";
+    public static final String publish_head_="/broker/";
+    public static final String Topic_split="/";
+    public static final String Device_sub_conncet="/conncet";
+    public static final String Device_sub_disconncet="/disconncet";
+
+    public static final String Device_pub_status_disconncet="{\"Device\":\"%s\",\"Status\":\"%s\"}";
 
     private BrokerConstants() {
     }

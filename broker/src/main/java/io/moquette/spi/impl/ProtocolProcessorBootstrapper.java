@@ -16,8 +16,16 @@
 
 package io.moquette.spi.impl;
 
+import com.hazelcast.config.ClasspathXmlConfig;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.FileSystemXmlConfig;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.ITopic;
 import io.moquette.BrokerConstants;
 import io.moquette.interception.InterceptHandler;
+import io.moquette.interception.hazelcastHandler.HazelcastListener;
+import io.moquette.interception.hazelcastHandler.HazelcastMsg;
 import io.moquette.server.ConnectionDescriptorStore;
 import io.moquette.server.Server;
 import io.moquette.server.config.IConfig;
@@ -128,30 +136,7 @@ public class ProtocolProcessorBootstrapper {
         };
 
         LOG.info("Configuring message interceptors...");
-        //拦截器
-        //集群拦截器
-        List<InterceptHandler> observers = new ArrayList<>(embeddedObservers);
-        if (props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster) !=null && props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster).equals("true")){
-            InterceptHandler handler = loadClass("io.moquette.interception.hazelcastHandler.HazelcastInterceptHandler", InterceptHandler.class, Server.class, server);
-            if (handler != null) {
-                observers.add(handler);
-            }
-        }
 
-
-        //数据输出拦截器
-        String interceptorClassName = props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_NAME);
-        if (interceptorClassName != null && !interceptorClassName.isEmpty()) {
-            String[] hadlers=interceptorClassName.split(",");
-            for (String hadle_:hadlers) {
-                InterceptHandler handler = loadClass(hadle_, InterceptHandler.class, Server.class, server);
-                if (handler != null) {
-                    observers.add(handler);
-                }
-            }
-
-        }
-        BrokerInterceptor interceptor = new BrokerInterceptor(props, observers);
 
         LOG.info("Initializing subscriptions store...");
         ISubscriptionsDirectory subscriptions = new CTrieSubscriptionDirectory();
@@ -199,6 +184,49 @@ public class ProtocolProcessorBootstrapper {
 
         LOG.info("Initializing connection descriptor store...");
         connectionDescriptors = new ConnectionDescriptorStore();
+
+        //启动集群通信
+        if (props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster) !=null && props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster).equals("true")) {
+            if (props.getProperty(BrokerConstants.HAZELCAST_CONFIGURATION) !=null){
+                Config hzconfig = null;
+                if (this.getClass().getClassLoader().getResource(props.getProperty(BrokerConstants.HAZELCAST_CONFIGURATION)) != null) {
+                    hzconfig = new ClasspathXmlConfig(props.getProperty(BrokerConstants.HAZELCAST_CONFIGURATION));
+                } else {
+                    hzconfig = new FileSystemXmlConfig(props.getProperty(BrokerConstants.HAZELCAST_CONFIGURATION));
+                }
+                LOG.info(String.format("starting server with hazelcast configuration file : %s",hzconfig));
+                server.setHazelcastInstance(Hazelcast.newHazelcastInstance(hzconfig));
+            } else {
+                LOG.info("starting server with hazelcast default file");
+                //hazelcastInstance = Hazelcast.newHazelcastInstance();
+                server.setHazelcastInstance(Hazelcast.newHazelcastInstance());
+            }
+            server.listenOnHazelCastMsg(connectionDescriptors);
+        }
+        //拦截器
+        //集群拦截器
+        List<InterceptHandler> observers = new ArrayList<>(embeddedObservers);
+        if (props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster) !=null && props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster).equals("true")){
+            InterceptHandler handler = loadClass("io.moquette.interception.hazelcastHandler.HazelcastInterceptHandler", InterceptHandler.class, Server.class, server);
+            if (handler != null) {
+                observers.add(handler);
+            }
+        }
+
+
+        //数据输出拦截器
+        String interceptorClassName = props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_NAME);
+        if (interceptorClassName != null && !interceptorClassName.isEmpty()) {
+            String[] hadlers=interceptorClassName.split(",");
+            for (String hadle_:hadlers) {
+                InterceptHandler handler = loadClass(hadle_, InterceptHandler.class, Server.class, server);
+                if (handler != null) {
+                    observers.add(handler);
+                }
+            }
+
+        }
+        BrokerInterceptor interceptor = new BrokerInterceptor(props, observers);
 
         LOG.info("Initializing MQTT protocol processor...");
         boolean allowAnonymous = props.boolProp(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, true);

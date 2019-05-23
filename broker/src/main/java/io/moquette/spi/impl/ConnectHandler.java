@@ -71,6 +71,7 @@ public class ConnectHandler {
         LOG.debug("Processing CONNECT message. CId={}, username={}", clientId, username);
 
         if (isNotProtocolVersion(msg, MqttVersion.MQTT_3_1) && isNotProtocolVersion(msg, MqttVersion.MQTT_3_1_1)) {
+            //断开连接 并且原因通知对方
             MqttConnAckMessage badProto = connAck(CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION);
 
             LOG.error("MQTT protocol version is not valid. CId={}", clientId);
@@ -170,6 +171,7 @@ public class ConnectHandler {
                 }
             }
         });
+       // m_interceptor.notifyClientConnected(msg);
     }
 
     private boolean isNotProtocolVersion(MqttConnectMessage msg, MqttVersion version) {

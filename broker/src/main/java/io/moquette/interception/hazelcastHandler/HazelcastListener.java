@@ -2,6 +2,7 @@ package io.moquette.interception.hazelcastHandler;
 
 import com.hazelcast.core.Message;
 import com.hazelcast.core.MessageListener;
+import io.moquette.server.ConnectionDescriptorStore;
 import io.moquette.server.Server;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.MqttMessageBuilders;
@@ -18,25 +19,47 @@ public class HazelcastListener implements MessageListener<HazelcastMsg> {
     private static final Logger LOG = LoggerFactory.getLogger(HazelcastListener.class);
 
     private final Server server;
+    private final ConnectionDescriptorStore connectionDescriptors_;
 
-    public HazelcastListener(Server server){
+    public HazelcastListener(Server server, ConnectionDescriptorStore connectionDescriptors){
         this.server = server;
+        this.connectionDescriptors_=connectionDescriptors;
     }
     @Override
     public void onMessage(Message<HazelcastMsg> msg) {
         try {
            // if (!msg.getPublishingMember().equals(server.getHazelcastInstance().getCluster().getLocalMember())) {
-                LOG.info("{} received from hazelcast for topic {} message: {}", msg.getMessageObject().getClientId(),
-                    msg.getMessageObject().getTopic(), msg.getMessageObject().getPayload());
-                MqttPublishMessage publishMessage = MqttMessageBuilders.publish().topicName(msg.getMessageObject().getTopic())
-                    .payload(Unpooled.copiedBuffer(ByteBuffer.wrap(msg.getMessageObject().getPayload())))
-                    .qos(Qos_enum(msg.getMessageObject().getQos())).build();
-                //publishMessage.setTopicName(msg.getMessageObject().getTopic());
-                //publishMessage.setQos(AbstractMessage.QOSType.valueOf(msg.getMessageObject().getQos()));
-                //publishMessage.setPayload(ByteBuffer.wrap(msg.getMessageObject().getPayload()));
-                //publishMessage.setLocal(false);
-                //publishMessage.setClientId(msg.getMessageObject().getClientId());
-                server.internalPublish(publishMessage,msg.getMessageObject().getClientId());
+            switch (msg.getMessageObject().getMqttMessageType()){
+                case CONNECT:
+                    MqttPublishMessage publishCONNECTMessage = MqttMessageBuilders.publish().topicName(msg.getMessageObject().getTopic())
+                        .payload(Unpooled.copiedBuffer(ByteBuffer.wrap(msg.getMessageObject().getPayload())))
+                        .qos(Qos_enum(msg.getMessageObject().getQos())).build();
+
+                    break;
+                case PUBLISH:
+                    LOG.info("{} received from hazelcast for topic {} message: {}", msg.getMessageObject().getClientId(),
+                        msg.getMessageObject().getTopic(), msg.getMessageObject().getPayload());
+                    MqttPublishMessage publishMessage = MqttMessageBuilders.publish().topicName(msg.getMessageObject().getTopic())
+                        .payload(Unpooled.copiedBuffer(ByteBuffer.wrap(msg.getMessageObject().getPayload())))
+                        .qos(Qos_enum(msg.getMessageObject().getQos())).build();
+                    //publishMessage.setTopicName(msg.getMessageObject().getTopic());
+                    //publishMessage.setQos(AbstractMessage.QOSType.valueOf(msg.getMessageObject().getQos()));
+                    //publishMessage.setPayload(ByteBuffer.wrap(msg.getMessageObject().getPayload()));
+                    //publishMessage.setLocal(false);
+                    //publishMessage.setClientId(msg.getMessageObject().getClientId());
+                    server.internalPublish(publishMessage,msg.getMessageObject().getClientId());
+                    break;
+                case DISCONNECT:
+                    if (connectionDescriptors_.isConnected(msg.getMessageObject().getClientId())){
+                        if (connectionDescriptors_.lookupDescriptor(msg.getMessageObject().getClientId()).isPresent()){
+                            connectionDescriptors_.lookupDescriptor(msg.getMessageObject().getClientId()).get().abort();
+                        }
+                    }
+                    break;
+                    default:
+                        break;
+            }
+
             //}
         } catch (Exception ex) {
             LOG.error("error polling hazelcast msg queue", ex);
