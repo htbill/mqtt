@@ -67,6 +67,8 @@ class Qos0PublishHandler extends QosPublishHandler {
             msg.payload().readBytes(req);
             kafkabean_.data=(new String(req,"UTF-8"));
             kafkaProducerMsg.SendMessage(JSONObject.toJSONString(kafkabean_));
+
+           // LOG.info("sending to kafka broker for topic {} message: {} take time:{}", topic, kafkabean_.data,end_-star_);
         }else {
             String clientID = NettyUtils.clientID(channel);
             String username = NettyUtils.userName(channel);

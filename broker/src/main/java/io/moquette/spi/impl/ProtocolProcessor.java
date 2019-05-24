@@ -209,8 +209,8 @@ public class ProtocolProcessor {
     public void processPublish(Channel channel, MqttPublishMessage msg) throws UnsupportedEncodingException {
         final MqttQoS qos = msg.fixedHeader().qosLevel();
         final String clientId = NettyUtils.clientID(channel);
-        LOG.info("Processing PUBLISH message. CId={}, topic={}, messageId={}, qos={}", clientId,
-                 msg.variableHeader().topicName(), msg.variableHeader().messageId(), qos);
+        //LOG.info("Processing PUBLISH message. CId={}, topic={}, messageId={}, qos={}", clientId,
+                // msg.variableHeader().topicName(), msg.variableHeader().messageId(), qos);
         switch (qos) {
             case AT_MOST_ONCE:
                 this.qos0PublishHandler.receivedPublishQos0(channel, msg);

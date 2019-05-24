@@ -93,7 +93,7 @@ public final class BrokerConstants {
 
     public static final String STORAGE_CLASS_NAME = "storage_class";
     public static String cluster_name="";
-    public static final String publish_head_="/broker/";
+    public static final String publish_head_="broker/";
     public static final String Topic_split="/";
     public static final String Device_sub_conncet="/conncet";
     public static final String Device_sub_disconncet="/disconncet";

@@ -8,22 +8,32 @@ import io.moquette.interception.messages.InterceptConnectMessage;
 import io.moquette.interception.messages.InterceptConnectionLostMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.server.Server;
+
+
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.mqtt.MqttMessageBuilders;
 import io.netty.handler.codec.mqtt.MqttMessageType;
+import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
 
 import static io.netty.handler.codec.mqtt.MqttQoS.*;
 
 public class HazelcastInterceptHandler extends AbstractInterceptHandler {
     private static final Logger LOG = LoggerFactory.getLogger(HazelcastInterceptHandler.class);
     private final HazelcastInstance hz;
+    private final Server server;
     private final static String _connect="onConnect";
     private final static String _disconnect="DisConnect";
+
 
     private static final byte defalutqos=(byte)0;
     public HazelcastInterceptHandler (Server server){
         this.hz = server.getHazelcastInstance();
+        this.server=server;
     }
     @Override
     public String getID() {
@@ -32,14 +42,19 @@ public class HazelcastInterceptHandler extends AbstractInterceptHandler {
 
     @Override
     public void onConnect(InterceptConnectMessage msg) {
-
         ITopic<HazelcastMsg> topic = hz.getTopic("moquette");
         ///   /brokers/<node>/clients/<clientid>/connected
-
         String topic_= BrokerConstants.publish_head_+BrokerConstants.cluster_name+BrokerConstants.Topic_split+msg.getClientID()+BrokerConstants.Device_sub_conncet;
         HazelcastMsg hazelcastMsg = new HazelcastMsg(msg.getClientID(), topic_, defalutqos,
             String.format(BrokerConstants.Device_pub_status_disconncet,msg.getClientID(),_connect).getBytes(), msg.getUsername(), MqttMessageType.CONNECT);
         topic.publish(hazelcastMsg);
+        LOG.info("{} onConnect on {} message: {}", msg.getClientID(), topic_,  String.format(BrokerConstants.Device_pub_status_disconncet,msg.getClientID(),_disconnect));
+
+        //MqttPublishMessage publishCONNECTMessage = MqttMessageBuilders.publish().topicName(topic_)
+          //  .payload(Unpooled.copiedBuffer(ByteBuffer.wrap(String.format(BrokerConstants.Device_pub_status_disconncet,msg.getClientID(),_connect).getBytes())))
+            //.qos(AT_LEAST_ONCE).build();
+
+        //this.server.internalPublish(publishCONNECTMessage,msg.getClientID());
 
     }
 
@@ -50,6 +65,14 @@ public class HazelcastInterceptHandler extends AbstractInterceptHandler {
         HazelcastMsg hazelcastMsg = new HazelcastMsg(msg.getClientID(), topic_, defalutqos,
             String.format(BrokerConstants.Device_pub_status_disconncet,msg.getClientID(),_disconnect).getBytes(), msg.getUsername(), MqttMessageType.DISCONNECT);
         topic.publish(hazelcastMsg);
+        LOG.info("{} onConnectionLost on {} message: {}", msg.getClientID(), topic_,  String.format(BrokerConstants.Device_pub_status_disconncet,msg.getClientID(),_disconnect));
+
+        MqttPublishMessage publishCONNECTMessage = MqttMessageBuilders.publish().topicName(topic_)
+            .payload(Unpooled.copiedBuffer(ByteBuffer.wrap(String.format(BrokerConstants.Device_pub_status_disconncet,msg.getClientID(),_disconnect).getBytes())))
+            .qos(AT_LEAST_ONCE).build();
+
+        //this.server.internalPublish(publishCONNECTMessage,msg.getClientID());
+
     }
 
     @Override
@@ -64,6 +87,8 @@ public class HazelcastInterceptHandler extends AbstractInterceptHandler {
             HazelcastMsg hazelcastMsg = new HazelcastMsg(msg.getClientID(), msg.getTopicName(), byteValue(msg.getQos()),
                 bytes, msg.getUsername(), MqttMessageType.PUBLISH);
             topic.publish(hazelcastMsg);
+
+
         }catch (Exception e){
             LOG.info(e.getMessage());
         }

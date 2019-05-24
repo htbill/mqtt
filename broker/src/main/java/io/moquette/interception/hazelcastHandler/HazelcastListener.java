@@ -31,13 +31,16 @@ public class HazelcastListener implements MessageListener<HazelcastMsg> {
            // if (!msg.getPublishingMember().equals(server.getHazelcastInstance().getCluster().getLocalMember())) {
             switch (msg.getMessageObject().getMqttMessageType()){
                 case CONNECT:
+                    LOG.info("{} received  connect from hazelcast for topic {} message: {}", msg.getMessageObject().getClientId(),
+                        msg.getMessageObject().getTopic(), msg.getMessageObject().getPayload());
                     MqttPublishMessage publishCONNECTMessage = MqttMessageBuilders.publish().topicName(msg.getMessageObject().getTopic())
                         .payload(Unpooled.copiedBuffer(ByteBuffer.wrap(msg.getMessageObject().getPayload())))
                         .qos(Qos_enum(msg.getMessageObject().getQos())).build();
 
+                    server.internalPublish(publishCONNECTMessage,msg.getMessageObject().getClientId());
                     break;
                 case PUBLISH:
-                    LOG.info("{} received from hazelcast for topic {} message: {}", msg.getMessageObject().getClientId(),
+                    LOG.info("{} received public from hazelcast for topic {} message: {}", msg.getMessageObject().getClientId(),
                         msg.getMessageObject().getTopic(), msg.getMessageObject().getPayload());
                     MqttPublishMessage publishMessage = MqttMessageBuilders.publish().topicName(msg.getMessageObject().getTopic())
                         .payload(Unpooled.copiedBuffer(ByteBuffer.wrap(msg.getMessageObject().getPayload())))
@@ -50,11 +53,17 @@ public class HazelcastListener implements MessageListener<HazelcastMsg> {
                     server.internalPublish(publishMessage,msg.getMessageObject().getClientId());
                     break;
                 case DISCONNECT:
-                    if (connectionDescriptors_.isConnected(msg.getMessageObject().getClientId())){
+                    LOG.info("{} received  disconnect from hazelcast for topic {} message: {}", msg.getMessageObject().getClientId(),
+                        msg.getMessageObject().getTopic(), msg.getMessageObject().getPayload());
+                    /*if (connectionDescriptors_.isConnected(msg.getMessageObject().getClientId())){
                         if (connectionDescriptors_.lookupDescriptor(msg.getMessageObject().getClientId()).isPresent()){
                             connectionDescriptors_.lookupDescriptor(msg.getMessageObject().getClientId()).get().abort();
                         }
-                    }
+                    }*/
+                    MqttPublishMessage publishDISCONNECTMessage = MqttMessageBuilders.publish().topicName(msg.getMessageObject().getTopic())
+                        .payload(Unpooled.copiedBuffer(ByteBuffer.wrap(msg.getMessageObject().getPayload())))
+                        .qos(Qos_enum(msg.getMessageObject().getQos())).build();
+                    server.internalPublish(publishDISCONNECTMessage,msg.getMessageObject().getClientId());
                     break;
                     default:
                         break;

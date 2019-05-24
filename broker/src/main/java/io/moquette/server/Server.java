@@ -194,7 +194,7 @@ public class Server {
             String kafkaservers=config.getProperty(BrokerConstants.Kafkaservers);
             String topic =config.getProperty(BrokerConstants.KafkaTopic);
             if (kafkaservers!=null && topic!=null){
-                //new kafkaProducerMsg(kafkaservers,topic);
+                new kafkaProducerMsg(topic,kafkaservers);
                 LOG.info("kafkaProducerMsg init is secuess");
             }else {
                 LOG.error("kafka parm is null please reset parm");

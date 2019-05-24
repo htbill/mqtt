@@ -171,7 +171,7 @@ public class ConnectHandler {
                 }
             }
         });
-       // m_interceptor.notifyClientConnected(msg);
+        //m_interceptor.notifyClientConnected(msg);
     }
 
     private boolean isNotProtocolVersion(MqttConnectMessage msg, MqttVersion version) {

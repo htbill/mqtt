@@ -139,13 +139,13 @@ public class NettyAcceptor implements ServerAcceptor {
         boolean epoll = props.boolProp(BrokerConstants.NETTY_EPOLL_PROPERTY_NAME, false);
         if (epoll) {
             LOG.info("Netty is using Epoll");
-            m_bossGroup = new EpollEventLoopGroup();
-            m_workerGroup = new EpollEventLoopGroup();
+            m_bossGroup = new EpollEventLoopGroup(4);
+            m_workerGroup = new EpollEventLoopGroup(4);
             channelClass = EpollServerSocketChannel.class;
         } else {
             LOG.info("Netty is using NIO");
-            m_bossGroup = new NioEventLoopGroup();
-            m_workerGroup = new NioEventLoopGroup();
+            m_bossGroup = new NioEventLoopGroup(4);
+            m_workerGroup = new NioEventLoopGroup(4);
             channelClass = NioServerSocketChannel.class;
         }
 
