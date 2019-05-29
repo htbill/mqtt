@@ -35,6 +35,8 @@ import io.moquette.spi.ISessionsStore;
 import io.moquette.spi.IStore;
 import io.moquette.spi.ISubscriptionsStore;
 import io.moquette.spi.Utils.C3p0ConnectPools;
+import io.moquette.spi.Utils.DataStatistics;
+import io.moquette.spi.impl.BrokerMetrics.Metricshandle;
 import io.moquette.spi.impl.security.*;
 import io.moquette.spi.impl.subscriptions.CTrieSubscriptionDirectory;
 import io.moquette.spi.impl.subscriptions.ISubscriptionsDirectory;
@@ -46,17 +48,23 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ScheduledExecutorService;
+
+import static io.moquette.BrokerConstants.METRICS_ENABLE_PROPERTY_NAME;
+import static io.moquette.BrokerConstants.cluster_name;
 
 /**
  * It's main responsibility is bootstrap the ProtocolProcessor.
  */
 public class ProtocolProcessorBootstrapper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ProtocolProcessorBootstrapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
     public static final String INMEMDB_STORE_CLASS = "io.moquette.persistence.MemoryStorageService";
 
     private ISessionsStore m_sessionsStore;
@@ -64,10 +72,14 @@ public class ProtocolProcessorBootstrapper {
     private ISubscriptionsStore subscriptionsStore;
 
     private Runnable storeShutdown;
-
+    Timer timer = new Timer();
     private final ProtocolProcessor m_processor = new ProtocolProcessor();
     private ConnectionDescriptorStore connectionDescriptors;
-
+    private static Metricshandle Metriciml=null;
+    public static Metricshandle GetMetricshandle()
+    {
+        return Metriciml;
+    }
     public ProtocolProcessorBootstrapper() {
     }
 
@@ -184,6 +196,27 @@ public class ProtocolProcessorBootstrapper {
 
         LOG.info("Initializing connection descriptor store...");
         connectionDescriptors = new ConnectionDescriptorStore();
+        final String useFineMetrics = props.getProperty(METRICS_ENABLE_PROPERTY_NAME);
+        if (useFineMetrics!=null) {
+            this.Metriciml=loadClass(useFineMetrics, Metricshandle.class, Server.class, server);
+            if (this.Metriciml!=null){
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        try {
+                            Metriciml.BrokerActiveCOUNT(cluster_name, DataStatistics.ActiveCount.get(),DataStatistics.OnlineCount.get(),DataStatistics.UnlineCount.get(), C3p0ConnectPools.getConnection());
+                            Metriciml.BrokerPublishSubMsgSize(cluster_name,DataStatistics.PublishSize.get(),DataStatistics.SUBSize.get(), C3p0ConnectPools.getConnection());
+                        } catch (SQLException e) {
+                            //e.printStackTrace();
+                        }
+
+                    }
+                },1000,30000);
+            }
+
+
+
+        }
 
         //启动集群通信
         if (props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster) !=null && props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster).equals("true")) {

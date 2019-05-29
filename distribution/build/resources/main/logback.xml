@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+<!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+<property name="LOG_HOME" value="/Users/yc_cb/1"/>
+<property name="LOG_Device_Sensing_Data" value="/Users/yc_cb/2"/>
+<property name="LOG_Device_Login_Msg" value="/Users/yc_cb/3"/>
+<!-- 控制台输出 -->
+<appender name="STDOUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy"> 
+<!--日志文件输出的文件名-->
+<FileNamePattern>${LOG_HOME}/TestWeb.log.%d{yyyy-MM-dd}.log</FileNamePattern>
+<!--日志文件保留天数-->
+<MaxHistory>30</MaxHistory>
+</rollingPolicy> 
+<encoder> 
+　<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+</encoder> 
+</appender>
+
+<!-- 按照每天生成日志文件 -->
+<appender name="Device_Sensing_Data" class="ch.qos.logback.core.rolling.RollingFileAppender">
+<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy"> 
+<!--日志文件输出的文件名-->
+<FileNamePattern>${LOG_Device_Sensing_Data}/TestWeb.log.%d{yyyy-MM-dd}.log</FileNamePattern>
+<!--日志文件保留天数-->
+<MaxHistory>30</MaxHistory>
+</rollingPolicy> 
+<encoder> 
+　<pattern>%msg%n</pattern>
+</encoder> 
+</appender>
+
+<!-- 按照每天生成日志文件 设备登陆信息 -->
+<appender name="Device_Login_Msg" class="ch.qos.logback.core.rolling.RollingFileAppender">
+<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy"> 
+<!--日志文件输出的文件名-->
+<FileNamePattern>${LOG_Device_Login_Msg}/TestWeb.log.%d{yyyy-MM-dd}.log</FileNamePattern>
+<!--日志文件保留天数-->
+<MaxHistory>30</MaxHistory>
+</rollingPolicy> 
+<encoder> 
+　<pattern>%msg%n</pattern>
+</encoder> 
+</appender>
+<logger name="Device_Sensing_Data">  
+        <level value="info"/>  
+        <appender-ref ref="Device_Sensing_Data"/>  
+ </logger>  
+ <logger name="Device_Login_Msg">  
+        <level value="info"/>  
+        <appender-ref ref="Device_Login_Msg"/>  
+ </logger>  
+<logger name="STDOUT">  
+        <level value="info"/>  
+        <appender-ref ref="STDOUT"/>  
+ </logger> 
+
+<!-- 日志输出级别 -->
+<root level="INFO">
+<appender-ref ref="STDOUT" />
+</root>
+</configuration>

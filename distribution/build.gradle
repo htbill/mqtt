@@ -11,7 +11,7 @@ dependencies {
   compile project(':moquette-h2-storage')
   compile project(':moquette-mapdb-storage')
 
-  compile group: 'org.slf4j', name: 'slf4j-log4j12', version:'1.7.5'
+  //compile group: 'org.slf4j', name: 'slf4j-log4j12', version:'1.7.5'
 }
 
 def packageSet = project.copySpec {
@@ -35,6 +35,7 @@ def packageSet = project.copySpec {
     from 'src/main/resources/moquette.conf'
     from 'src/main/resources/password_file.conf'
     from 'src/main/resources/hazelcast.xml'
+    from 'src/main/resources/logback.xml'
     // from 'src/main/resources/acl.conf'
   }
 

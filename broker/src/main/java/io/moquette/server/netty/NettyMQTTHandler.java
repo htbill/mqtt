@@ -16,6 +16,8 @@
 
 package io.moquette.server.netty;
 
+import io.moquette.BrokerConstants;
+import io.moquette.spi.Utils.DataStatistics;
 import io.moquette.spi.impl.ProtocolProcessor;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -37,7 +39,8 @@ import java.io.IOException;
 @Sharable
 public class NettyMQTTHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NettyMQTTHandler.class);
+    private static final Logger LOG_Device_Status = LoggerFactory.getLogger("Device_Login_Msg");
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
     private final ProtocolProcessor m_processor;
 
     public NettyMQTTHandler(ProtocolProcessor processor) {
@@ -115,6 +118,9 @@ public class NettyMQTTHandler extends ChannelInboundHandlerAdapter {
         if (clientID != null && !clientID.isEmpty()) {
             LOG.info("Notifying connection lost event. MqttClientId = {}", clientID);
             m_processor.processConnectionLost(clientID, ctx.channel());
+
+            String Username = NettyUtils.userName(ctx.channel());
+            LOG_Device_Status.info(BrokerConstants.Device_Online_msg, clientID, DataStatistics.DeviceStatus.Unonline,System.currentTimeMillis() ,Username,BrokerConstants.cluster_name,DataStatistics.ONlineStatus.SUC,"");
         }
         ctx.close().addListener(CLOSE_ON_FAILURE);
     }

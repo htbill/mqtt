@@ -82,6 +82,7 @@ public final class BrokerConstants {
     public static final String NETTY_CHANNEL_TIMEOUT_SECONDS_PROPERTY_NAME = "netty.channel_timeout.seconds";
     public static final String NETTY_EPOLL_PROPERTY_NAME = "netty.epoll";
     public static final String NETTY_MAX_BYTES_PROPERTY_NAME = "netty.mqtt.message_size";
+    public static final String NETTY_MAX_EventLoopGroupthread="EventLoopGroupthread";
     public static final int DEFAULT_NETTY_MAX_BYTES_IN_MESSAGE = 8092;
     public static final String METRICS_ENABLE_PROPERTY_NAME = "use_metrics";
     public static final String METRICS_LIBRATO_EMAIL_PROPERTY_NAME = "metrics.librato.email";
@@ -99,6 +100,9 @@ public final class BrokerConstants {
     public static final String Device_sub_disconncet="/disconncet";
 
     public static final String Device_pub_status_disconncet="{\"Device\":\"%s\",\"Status\":\"%s\"}";
+
+    public static final String Device_pub_detail_msg="{\"clientid\":\"%s\",\"data\":\"%s\",\"timemap\":%s,\"username\":\"%s\"}";
+    public static final String Device_Online_msg="{\"clientid\":\"{}\",\"status\":\"{}\",\"timemap\":{},\"username\":\"{}\",\"brokername\":\"{}\",\"status_1\":\"{}\",\"Msg\":\"{}\"}";
 
     private BrokerConstants() {
     }

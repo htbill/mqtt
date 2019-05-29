@@ -32,6 +32,7 @@ import io.moquette.server.netty.metrics.MessageMetrics;
 import io.moquette.server.netty.metrics.MessageMetricsCollector;
 import io.moquette.server.netty.metrics.MessageMetricsHandler;
 import io.moquette.spi.impl.ProtocolProcessor;
+import io.moquette.spi.impl.ProtocolProcessorBootstrapper;
 import io.moquette.spi.security.ISslContextCreator;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -231,13 +232,14 @@ public class NettyAcceptor implements ServerAcceptor {
                 if (errorsCather.isPresent()) {
                     pipeline.addLast("bugsnagCatcher", errorsCather.get());
                 }
-                pipeline.addFirst("bytemetrics", new BytesMetricsHandler(m_bytesMetricsCollector));
+                //pipeline.addFirst("bytemetrics", new BytesMetricsHandler(m_bytesMetricsCollector));
                 pipeline.addLast("decoder", new MqttDecoder(maxBytesInMessage));
                 pipeline.addLast("encoder", MqttEncoder.INSTANCE);
-                pipeline.addLast("metrics", new MessageMetricsHandler(m_metricsCollector));
-                pipeline.addLast("messageLogger", new MQTTMessageLogger());
-                if (metrics.isPresent()) {
-                    pipeline.addLast("wizardMetrics", metrics.get());
+                //pipeline.addLast("metrics", new MessageMetricsHandler(m_metricsCollector));
+                //pipeline.addLast("messageLogger", new MQTTMessageLogger());
+                if (ProtocolProcessorBootstrapper.GetMetricshandle()!=null) {
+                    DropWizardMetricsHandler metricsHandler = new DropWizardMetricsHandler();
+                    pipeline.addLast("wizardMetrics", metricsHandler);
                 }
                 pipeline.addLast("handler", handler);
             }

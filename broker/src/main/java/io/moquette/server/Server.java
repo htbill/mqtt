@@ -16,6 +16,9 @@
 
 package io.moquette.server;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.util.StatusPrinter;
 import com.hazelcast.config.ClasspathXmlConfig;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.FileSystemXmlConfig;
@@ -55,7 +58,7 @@ import static io.moquette.logging.LoggingUtils.getInterceptorIds;
  */
 public class Server {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Server.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private ServerAcceptor m_acceptor;
 
@@ -82,6 +85,7 @@ public class Server {
     }
 
     public static void main(String[] args) throws Exception {
+        initLogback(System.getProperty("logback.path", null));
         final Server server = new Server();
         server.startServer();
         System.out.println("Server started, version 0.12-SNAPSHOT");
@@ -119,7 +123,19 @@ public class Server {
         final IConfig config = new ResourceLoaderConfig(filesystemLoader);
         startServer(config);
     }
-
+    private static void initLogback(String url) throws Exception{
+        File file = new File( url);
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        JoranConfigurator joranConfigurator = new JoranConfigurator();
+        joranConfigurator.setContext(loggerContext);
+        loggerContext.reset();
+        try {
+            joranConfigurator.doConfigure(file);
+        } catch (Exception e) {
+            throw new Exception("参数配置异常："+e.getMessage());
+        }
+        StatusPrinter.printInCaseOfErrorsOrWarnings(loggerContext);
+    }
     /**
      * Starts the server with the given properties.
      * <p>

@@ -1,11 +1,13 @@
 package io.moquette.spi.impl;
 
+import io.moquette.BrokerConstants;
 import io.moquette.connections.IConnectionsManager;
 import io.moquette.server.ConnectionDescriptor;
 import io.moquette.server.netty.AutoFlushHandler;
 import io.moquette.server.netty.NettyUtils;
 import io.moquette.spi.ClientSession;
 import io.moquette.spi.ISessionsStore;
+import io.moquette.spi.Utils.DataStatistics;
 import io.moquette.spi.impl.subscriptions.ISubscriptionsDirectory;
 import io.moquette.spi.impl.subscriptions.Subscription;
 import io.moquette.spi.impl.subscriptions.Topic;
@@ -33,7 +35,8 @@ import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.*;
 
 public class ConnectHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ConnectHandler.class);
+    private static final Logger LOG_Device_Status = LoggerFactory.getLogger("Device_Login_Msg");
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private IConnectionsManager connectionDescriptors;
     private BrokerInterceptor m_interceptor;
@@ -77,6 +80,7 @@ public class ConnectHandler {
             LOG.error("MQTT protocol version is not valid. CId={}", clientId);
             channel.writeAndFlush(badProto).addListener(FIRE_EXCEPTION_ON_FAILURE);
             channel.close().addListener(CLOSE_ON_FAILURE);
+            LOG_Device_Status.info(BrokerConstants.Device_Online_msg, clientId, DataStatistics.DeviceStatus.Online,System.currentTimeMillis() ,username,BrokerConstants.cluster_name,DataStatistics.ONlineStatus.FAIL,DataStatistics.ONlineFailMag.MQTT_protocol_version_is_not_valid);
             return;
         }
 
@@ -87,7 +91,8 @@ public class ConnectHandler {
 
                 channel.writeAndFlush(badId).addListener(FIRE_EXCEPTION_ON_FAILURE);
                 channel.close().addListener(CLOSE_ON_FAILURE);
-                LOG.error("MQTT client ID cannot be empty. Username={}", username);
+                //LOG.error("MQTT client ID cannot be empty. Username={}", username);
+                LOG_Device_Status.info(BrokerConstants.Device_Online_msg, clientId, DataStatistics.DeviceStatus.Online,System.currentTimeMillis() ,username,BrokerConstants.cluster_name,DataStatistics.ONlineStatus.FAIL,DataStatistics.ONlineFailMag.client_is_null);
                 return;
             }
 
@@ -156,6 +161,7 @@ public class ConnectHandler {
                         return;
                     }
                     m_interceptor.notifyClientConnected(msg);
+                    LOG_Device_Status.info(BrokerConstants.Device_Online_msg, connectClientId, DataStatistics.DeviceStatus.Online,System.currentTimeMillis() ,username,BrokerConstants.cluster_name,DataStatistics.ONlineStatus.SUC,"");
                     if (!msg.variableHeader().isCleanSession()) {
                         // force the republish of stored QoS1 and QoS2
                         internalRepublisher.publishStored(clientSession);

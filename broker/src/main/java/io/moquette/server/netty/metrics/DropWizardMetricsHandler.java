@@ -22,6 +22,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.librato.metrics.reporter.Librato;
 import io.moquette.server.config.IConfig;
 import io.moquette.server.netty.NettyUtils;
+import io.moquette.spi.Utils.DataStatistics;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.mqtt.MqttMessage;
@@ -43,23 +44,7 @@ public final class DropWizardMetricsHandler extends ChannelInboundHandlerAdapter
     private Counter connectedClientsMetrics;
 
     public void init(IConfig props) {
-        this.metrics = new MetricRegistry();
-        this.publishesMetrics = metrics.meter("publish.requests");
-        this.subscribeMetrics = metrics.meter("subscribe.requests");
-        this.connectedClientsMetrics = metrics.counter("connect.num_clients");
 
-//        ConsoleReporter reporter = ConsoleReporter.forRegistry(metrics)
-//            .convertRatesTo(TimeUnit.SECONDS)
-//            .convertDurationsTo(TimeUnit.MILLISECONDS)
-//            .build();
-//        reporter.start(1, TimeUnit.MINUTES);
-        final String email = props.getProperty(METRICS_LIBRATO_EMAIL_PROPERTY_NAME);
-        final String token = props.getProperty(METRICS_LIBRATO_TOKEN_PROPERTY_NAME);
-        final String source = props.getProperty(METRICS_LIBRATO_SOURCE_PROPERTY_NAME);
-
-        Librato.reporter(this.metrics, email, token)
-            .setSource(source)
-            .start(10, TimeUnit.SECONDS);
     }
 
     @Override
@@ -68,16 +53,21 @@ public final class DropWizardMetricsHandler extends ChannelInboundHandlerAdapter
         MqttMessageType messageType = msg.fixedHeader().messageType();
         switch (messageType) {
             case PUBLISH:
-                this.publishesMetrics.mark();
+                DataStatistics.PublishSize.getAndIncrement();
                 break;
             case SUBSCRIBE:
-                this.subscribeMetrics.mark();
+                DataStatistics.SUBSize.getAndIncrement();
                 break;
             case CONNECT:
-                this.connectedClientsMetrics.inc();
+                DataStatistics.OnlineCount.getAndIncrement();
+                DataStatistics.ActiveCount.getAndIncrement();
+
+                //this.connectedClientsMetrics.inc();
                 break;
             case DISCONNECT:
-                this.connectedClientsMetrics.dec();
+                //DataStatistics.UnlineCount.getAndIncrement();
+                //DataStatistics.ActiveCount.getAndDecrement();
+                //this.connectedClientsMetrics.dec();
                 break;
             default:
                 break;
@@ -89,9 +79,12 @@ public final class DropWizardMetricsHandler extends ChannelInboundHandlerAdapter
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         String clientID = NettyUtils.clientID(ctx.channel());
         if (clientID != null && !clientID.isEmpty()) {
-            this.connectedClientsMetrics.dec();
+            DataStatistics.UnlineCount.getAndIncrement();
+            DataStatistics.ActiveCount.getAndDecrement();
+            //this.connectedClientsMetrics.dec();
         }
         ctx.fireChannelInactive();
     }
+
 
 }

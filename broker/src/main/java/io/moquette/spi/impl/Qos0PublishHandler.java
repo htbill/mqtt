@@ -38,7 +38,8 @@ import static io.moquette.spi.impl.ProtocolProcessor.asStoredMessage;
 
 class Qos0PublishHandler extends QosPublishHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Qos0PublishHandler.class);
+    private static final Logger LOG_data = LoggerFactory.getLogger("Device_Sensing_Data");
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private final IMessagesStore m_messagesStore;
     private final BrokerInterceptor m_interceptor;
@@ -59,15 +60,12 @@ class Qos0PublishHandler extends QosPublishHandler {
         if (topic.toString().startsWith(DataStatistics.PassThrough,0)){
             String clientID = NettyUtils.clientID(channel);
             String username = NettyUtils.userName(channel);
-            kafkabean kafkabean_=new kafkabean();
-            kafkabean_.clientid=clientID;
-            kafkabean_.timemap=(System.currentTimeMillis());
-            kafkabean_.username=(username);
+
             byte[] req = new byte[msg.payload().readableBytes()];
             msg.payload().readBytes(req);
-            kafkabean_.data=(new String(req,"UTF-8"));
-            kafkaProducerMsg.SendMessage(JSONObject.toJSONString(kafkabean_));
-
+            kafkabean kafkabean_=kafkabean.getInstance(clientID,(new String(req,"UTF-8")),System.currentTimeMillis(),username);
+            LOG_data.info(kafkabean_.tostrings());
+            // kafkaProducerMsg.SendMessage(kafkabean_.tostrings());
            // LOG.info("sending to kafka broker for topic {} message: {} take time:{}", topic, kafkabean_.data,end_-star_);
         }else {
             String clientID = NettyUtils.clientID(channel);
@@ -91,6 +89,11 @@ class Qos0PublishHandler extends QosPublishHandler {
                 // QoS == 0 && retain => clean old retained
                 m_messagesStore.cleanRetained(topic);
             }
+            //log write
+            byte[] req = new byte[msg.payload().readableBytes()];
+            msg.payload().readBytes(req);
+            kafkabean kafkabean_=kafkabean.getInstance(clientID,(new String(req,"UTF-8")),System.currentTimeMillis(),username);
+            LOG_data.info(kafkabean_.tostrings());
             //同步数据
             m_interceptor.notifyTopicPublished(msg, clientID, username);
         }
