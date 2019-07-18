@@ -94,4 +94,4 @@ JAVA_OPTS="$JAVA_OPTS -XX:+UseGCLogFileRotation"
 JAVA_OPTS="$JAVA_OPTS -XX:NumberOfGCLogFiles=10"
 JAVA_OPTS="$JAVA_OPTS -XX:GCLogFileSize=10M"
 
-$JAVA -server $JAVA_OPTS $JAVA_OPTS_SCRIPT -Dlogback.path="$LOG_FILE" -Dmoquette.path="$MOQUETTE_PATH" -cp "$MOQUETTE_HOME/lib/*" io.moquette.server.Server
+$JAVA -server $JAVA_OPTS $JAVA_OPTS_SCRIPT -Dlogback.path="$MOQUETTE_PATH" -Dmoquette.path="$MOQUETTE_PATH" -cp "$MOQUETTE_HOME/lib/*" io.moquette.server.Server

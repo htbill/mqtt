@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 import static io.netty.handler.codec.mqtt.MqttQoS.*;
 
 public class HazelcastInterceptHandler extends AbstractInterceptHandler {
-    private static final Logger LOG = LoggerFactory.getLogger(HazelcastInterceptHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
     private final HazelcastInstance hz;
     private final Server server;
     private final static String _connect="onConnect";
@@ -67,9 +67,9 @@ public class HazelcastInterceptHandler extends AbstractInterceptHandler {
         topic.publish(hazelcastMsg);
         LOG.info("{} onConnectionLost on {} message: {}", msg.getClientID(), topic_,  String.format(BrokerConstants.Device_pub_status_disconncet,msg.getClientID(),_disconnect));
 
-        MqttPublishMessage publishCONNECTMessage = MqttMessageBuilders.publish().topicName(topic_)
-            .payload(Unpooled.copiedBuffer(ByteBuffer.wrap(String.format(BrokerConstants.Device_pub_status_disconncet,msg.getClientID(),_disconnect).getBytes())))
-            .qos(AT_LEAST_ONCE).build();
+       // MqttPublishMessage publishCONNECTMessage = MqttMessageBuilders.publish().topicName(topic_)
+         //   .payload(Unpooled.copiedBuffer(ByteBuffer.wrap(String.format(BrokerConstants.Device_pub_status_disconncet,msg.getClientID(),_disconnect).getBytes())))
+         //   .qos(AT_LEAST_ONCE).build();
 
         //this.server.internalPublish(publishCONNECTMessage,msg.getClientID());
 

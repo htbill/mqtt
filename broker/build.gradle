@@ -1,6 +1,17 @@
 
 description = 'Moquette - broker'
+group'com.suneony'
+version'1.0.0'
 
+apply plugin:'java'
+
+repositories {
+  mavenLocal() //1.优先查找本地maven库，性能最好
+  maven{//2.其次查找aliyun maven库
+    url'http://maven.aliyun.com/nexus/content/groups/public/'
+  }
+  mavenCentral()//3.最后查找maven中央库
+}
 dependencies {
     compile group: 'io.netty', name: 'netty-common', version: nettyVersion
     compile group: 'io.netty', name: 'netty-buffer', version: nettyVersion
@@ -39,11 +50,12 @@ dependencies {
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
     compile group: 'com.hazelcast', name: 'hazelcast', version: '3.5'
     compile(group: 'org.apache.kafka', name: 'kafka_2.12', version: '1.0.0'){
-        exclude group: 'log4j',module: 'log4j'
-        exclude group: 'org.slf4j',module: 'slf4j-log4j12'
+      exclude group: 'log4j',module: 'log4j'
+      exclude group: 'org.slf4j',module: 'slf4j-log4j12'
     }
 
     compile group: 'com.alibaba', name: 'fastjson', version: '1.2.47'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.7'
     compile group: 'ch.qos.logback', name: 'logback-core', version: '1.1.7'
+
 }

@@ -24,7 +24,7 @@ import static io.netty.handler.codec.mqtt.MqttQoS.*;
 
 final class MQTTConnection {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MQTTConnection.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     final Channel channel;
     private BrokerConfiguration brokerConfig;

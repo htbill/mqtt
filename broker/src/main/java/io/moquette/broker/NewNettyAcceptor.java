@@ -90,7 +90,7 @@ public class NewNettyAcceptor {
     EventLoopGroup m_workerGroup;
     BytesMetricsCollector m_bytesMetricsCollector = new BytesMetricsCollector();
     MessageMetricsCollector m_metricsCollector = new MessageMetricsCollector();
-    private Optional<? extends ChannelInboundHandler> metrics;
+   // private Optional<? extends ChannelInboundHandler> metrics;
     private Optional<? extends ChannelInboundHandler> errorsCather;
 
     private int nettySoBacklog;
@@ -126,14 +126,7 @@ public class NewNettyAcceptor {
             channelClass = NioServerSocketChannel.class;
         }
 
-        final boolean useFineMetrics = props.boolProp(METRICS_ENABLE_PROPERTY_NAME, false);
-        if (useFineMetrics) {
-            DropWizardMetricsHandler metricsHandler = new DropWizardMetricsHandler();
-            metricsHandler.init(props);
-            this.metrics = Optional.of(metricsHandler);
-        } else {
-            this.metrics = Optional.empty();
-        }
+
 
         final boolean useBugSnag = props.boolProp(BUGSNAG_ENABLE_PROPERTY_NAME, false);
         if (useBugSnag) {
@@ -206,14 +199,16 @@ public class NewNettyAcceptor {
                 if (errorsCather.isPresent()) {
                     pipeline.addLast("bugsnagCatcher", errorsCather.get());
                 }
-                pipeline.addFirst("bytemetrics", new BytesMetricsHandler(m_bytesMetricsCollector));
+                //pipeline.addFirst("bytemetrics", new BytesMetricsHandler(m_bytesMetricsCollector));
                 pipeline.addLast("decoder", new MqttDecoder(maxBytesInMessage));
                 pipeline.addLast("encoder", MqttEncoder.INSTANCE);
                 pipeline.addLast("metrics", new MessageMetricsHandler(m_metricsCollector));
                 pipeline.addLast("messageLogger", new MQTTMessageLogger());
-                if (metrics.isPresent()) {
-                    pipeline.addLast("wizardMetrics", metrics.get());
-                }
+                final boolean useFineMetrics = props.boolProp(METRICS_ENABLE_PROPERTY_NAME, false);
+                //if (useFineMetrics) {
+                  //  DropWizardMetricsHandler metricsHandler = new DropWizardMetricsHandler();
+                    //pipeline.addLast("wizardMetrics", metricsHandler);
+                //}
                 pipeline.addLast("handler", handler);
             }
         });

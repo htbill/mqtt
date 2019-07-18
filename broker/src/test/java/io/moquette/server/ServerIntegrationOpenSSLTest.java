@@ -55,6 +55,10 @@ public class ServerIntegrationOpenSSLTest extends ServerIntegrationSSLTest {
         sslProps.put(BrokerConstants.KEY_STORE_PASSWORD_PROPERTY_NAME, "passw0rdsrv");
         sslProps.put(BrokerConstants.KEY_MANAGER_PASSWORD_PROPERTY_NAME, "passw0rdsrv");
         sslProps.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, IntegrationUtils.localMapDBPath());
-        m_server.startServer(sslProps);
+        try {
+            m_server.startServer(sslProps);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

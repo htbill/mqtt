@@ -41,7 +41,7 @@ import static io.moquette.logging.LoggingUtils.getInterceptorIds;
  */
 final class BrokerInterceptor implements Interceptor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BrokerInterceptor.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
     private final Map<Class<?>, List<InterceptHandler>> handlers;
     private final ExecutorService executor;
 

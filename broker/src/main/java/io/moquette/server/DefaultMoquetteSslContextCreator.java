@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  */
 class DefaultMoquetteSslContextCreator implements ISslContextCreator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultMoquetteSslContextCreator.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private final IConfig props;
 

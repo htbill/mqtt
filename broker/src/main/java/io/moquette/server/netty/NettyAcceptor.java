@@ -113,7 +113,7 @@ public class NettyAcceptor implements ServerAcceptor {
     EventLoopGroup m_workerGroup;
     BytesMetricsCollector m_bytesMetricsCollector = new BytesMetricsCollector();
     MessageMetricsCollector m_metricsCollector = new MessageMetricsCollector();
-    private Optional<? extends ChannelInboundHandler> metrics;
+    //private Optional<? extends ChannelInboundHandler> metrics;
     private Optional<? extends ChannelInboundHandler> errorsCather;
 
     private int nettySoBacklog;
@@ -122,6 +122,7 @@ public class NettyAcceptor implements ServerAcceptor {
     private boolean nettySoKeepalive;
     private int nettyChannelTimeoutSeconds;
     private int maxBytesInMessage;
+    private int EventLoopGroupthread;
 
     private Class<? extends ServerSocketChannel> channelClass;
 
@@ -136,30 +137,30 @@ public class NettyAcceptor implements ServerAcceptor {
         nettyChannelTimeoutSeconds = props.intProp(BrokerConstants.NETTY_CHANNEL_TIMEOUT_SECONDS_PROPERTY_NAME, 10);
         maxBytesInMessage = props.intProp(BrokerConstants.NETTY_MAX_BYTES_PROPERTY_NAME,
                 BrokerConstants.DEFAULT_NETTY_MAX_BYTES_IN_MESSAGE);
-
+        EventLoopGroupthread= props.intProp(BrokerConstants.NETTY_MAX_EventLoopGroupthread, 1);
         boolean epoll = props.boolProp(BrokerConstants.NETTY_EPOLL_PROPERTY_NAME, false);
         if (epoll) {
             LOG.info("Netty is using Epoll");
-            m_bossGroup = new EpollEventLoopGroup(4);
-            m_workerGroup = new EpollEventLoopGroup(4);
+            m_bossGroup = new EpollEventLoopGroup(EventLoopGroupthread);
+            m_workerGroup = new EpollEventLoopGroup(EventLoopGroupthread);
             channelClass = EpollServerSocketChannel.class;
         } else {
             LOG.info("Netty is using NIO");
-            m_bossGroup = new NioEventLoopGroup(4);
-            m_workerGroup = new NioEventLoopGroup(4);
+            m_bossGroup = new NioEventLoopGroup(EventLoopGroupthread);
+            m_workerGroup = new NioEventLoopGroup(EventLoopGroupthread);
             channelClass = NioServerSocketChannel.class;
         }
 
         final NettyMQTTHandler mqttHandler = new NettyMQTTHandler(processor);
 
-        final boolean useFineMetrics = props.boolProp(METRICS_ENABLE_PROPERTY_NAME, false);
-        if (useFineMetrics) {
-            DropWizardMetricsHandler metricsHandler = new DropWizardMetricsHandler();
-            metricsHandler.init(props);
-            this.metrics = Optional.of(metricsHandler);
-        } else {
-            this.metrics = Optional.empty();
-        }
+        //final boolean useFineMetrics = props.boolProp(METRICS_ENABLE_PROPERTY_NAME, false);
+        //if (useFineMetrics) {
+          //  DropWizardMetricsHandler metricsHandler = new DropWizardMetricsHandler();
+            //metricsHandler.init(props);
+            //this.metrics = Optional.of(metricsHandler);
+        //} else {
+          //  this.metrics = Optional.empty();
+        //}
 
         final boolean useBugSnag = props.boolProp(BUGSNAG_ENABLE_PROPERTY_NAME, false);
         if (useBugSnag) {
@@ -242,6 +243,7 @@ public class NettyAcceptor implements ServerAcceptor {
                     pipeline.addLast("wizardMetrics", metricsHandler);
                 }
                 pipeline.addLast("handler", handler);
+
             }
         });
     }
@@ -273,11 +275,11 @@ public class NettyAcceptor implements ServerAcceptor {
                 pipeline.addLast("bytebuf2wsEncoder", new ByteBufToWebSocketFrameEncoder());
                 pipeline.addFirst("idleStateHandler", new IdleStateHandler(nettyChannelTimeoutSeconds, 0, 0));
                 pipeline.addAfter("idleStateHandler", "idleEventHandler", timeoutHandler);
-                pipeline.addFirst("bytemetrics", new BytesMetricsHandler(m_bytesMetricsCollector));
+                //pipeline.addFirst("bytemetrics", new BytesMetricsHandler(m_bytesMetricsCollector));
                 pipeline.addLast("decoder", new MqttDecoder(maxBytesInMessage));
                 pipeline.addLast("encoder", MqttEncoder.INSTANCE);
-                pipeline.addLast("metrics", new MessageMetricsHandler(m_metricsCollector));
-                pipeline.addLast("messageLogger", new MQTTMessageLogger());
+                //pipeline.addLast("metrics", new MessageMetricsHandler(m_metricsCollector));
+                //pipeline.addLast("messageLogger", new MQTTMessageLogger());
                 pipeline.addLast("handler", handler);
             }
         });
@@ -309,11 +311,17 @@ public class NettyAcceptor implements ServerAcceptor {
                 pipeline.addFirst("idleStateHandler", new IdleStateHandler(nettyChannelTimeoutSeconds, 0, 0));
                 pipeline.addAfter("idleStateHandler", "idleEventHandler", timeoutHandler);
                 // pipeline.addLast("logger", new LoggingHandler("Netty", LogLevel.ERROR));
-                pipeline.addFirst("bytemetrics", new BytesMetricsHandler(m_bytesMetricsCollector));
+               //pipeline.addFirst("bytemetrics", new BytesMetricsHandler(m_bytesMetricsCollector));
                 pipeline.addLast("decoder", new MqttDecoder(maxBytesInMessage));
                 pipeline.addLast("encoder", MqttEncoder.INSTANCE);
-                pipeline.addLast("metrics", new MessageMetricsHandler(m_metricsCollector));
+               // pipeline.addLast("metrics", new MessageMetricsHandler(m_metricsCollector));
                 pipeline.addLast("messageLogger", new MQTTMessageLogger());
+
+                pipeline.addLast("messageLogger", new MQTTMessageLogger());
+                if (ProtocolProcessorBootstrapper.GetMetricshandle()!=null) {
+                    DropWizardMetricsHandler metricsHandler = new DropWizardMetricsHandler();
+                    pipeline.addLast("wizardMetrics", metricsHandler);
+                }
                 pipeline.addLast("handler", handler);
             }
         });

@@ -24,12 +24,12 @@ public class kafkabean implements Serializable,Cloneable{
      */
     public static kafkabean getInstance(String clientid,String  data,long timemap,String username){
         try {
-            kafkabean lkafkabean=(kafkabean) ekafkabean.clone();
+             kafkabean lkafkabean=(kafkabean) ekafkabean.clone();
             lkafkabean.clientid=clientid;
             lkafkabean.data=data;
             lkafkabean.timemap=timemap;
             lkafkabean.username=username;
-            return lkafkabean;
+             return lkafkabean;
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }

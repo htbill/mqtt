@@ -27,7 +27,7 @@ import java.util.Properties;
  */
 public class ResourceLoaderConfig extends IConfig {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ResourceLoaderConfig.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private final Properties m_properties;
     private final IResourceLoader resourceLoader;

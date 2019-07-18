@@ -91,13 +91,14 @@ public class ConnectHandler {
 
                 channel.writeAndFlush(badId).addListener(FIRE_EXCEPTION_ON_FAILURE);
                 channel.close().addListener(CLOSE_ON_FAILURE);
-                //LOG.error("MQTT client ID cannot be empty. Username={}", username);
+                LOG.error("MQTT client ID cannot be empty. Username={}", username);
                 LOG_Device_Status.info(BrokerConstants.Device_Online_msg, clientId, DataStatistics.DeviceStatus.Online,System.currentTimeMillis() ,username,BrokerConstants.cluster_name,DataStatistics.ONlineStatus.FAIL,DataStatistics.ONlineFailMag.client_is_null);
                 return;
             }
 
             // Generating client id.
             clientId = UUID.randomUUID().toString().replace("-", "");
+
             LOG.info("Client has connected with server generated id={}, username={}", clientId, username);
         }
 
@@ -161,6 +162,7 @@ public class ConnectHandler {
                         return;
                     }
                     m_interceptor.notifyClientConnected(msg);
+                   // String tel=String.format(BrokerConstants.Device_Online_msg, connectClientId, DataStatistics.DeviceStatus.Online,System.currentTimeMillis() ,username,BrokerConstants.cluster_name,DataStatistics.ONlineStatus.SUC,"");
                     LOG_Device_Status.info(BrokerConstants.Device_Online_msg, connectClientId, DataStatistics.DeviceStatus.Online,System.currentTimeMillis() ,username,BrokerConstants.cluster_name,DataStatistics.ONlineStatus.SUC,"");
                     if (!msg.variableHeader().isCleanSession()) {
                         // force the republish of stored QoS1 and QoS2

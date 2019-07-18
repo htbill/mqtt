@@ -20,7 +20,7 @@ import static io.netty.handler.codec.mqtt.MqttQoS.*;
 
 class PostOffice {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PostOffice.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private final Authorizator authorizator;
     private final ISubscriptionsDirectory subscriptions;

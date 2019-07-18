@@ -38,7 +38,7 @@ import static io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE;
  */
 public class ConnectionDescriptor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ConnectionDescriptor.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     public enum ConnectionState {
         // Connection states

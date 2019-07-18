@@ -31,7 +31,7 @@ import java.util.concurrent.*;
 
 public class MemorySessionStore implements ISessionsStore, ISubscriptionsStore {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MemorySessionStore.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     static class Session {
         final String clientID;

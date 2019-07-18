@@ -37,7 +37,7 @@ import java.util.Properties;
  */
 class ConfigurationParser {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ConfigurationParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private Properties m_properties = new Properties();
 

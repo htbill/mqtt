@@ -79,7 +79,7 @@ public class ServerIntegrationSSLTest {
             System.setProperty("moquette.path", backup);
     }
 
-    protected void startServer() throws IOException {
+    protected void startServer() throws Exception {
         String file = getClass().getResource("/").getPath();
         System.setProperty("moquette.path", file);
         m_server = new Server();

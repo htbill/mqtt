@@ -25,6 +25,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.mqtt.*;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import static io.moquette.spi.impl.ProtocolProcessorTest.NO_OBSERVERS_INTERCEPTOR;
@@ -171,11 +172,11 @@ abstract class AbstractProtocolProcessorCommonUtils {
         this.m_processor.internalPublish(publish, "INTRPUBL");
     }
 
-    protected void publishToAs(String clientId, String topic, MqttQoS qos, boolean retained) {
+    protected void publishToAs(String clientId, String topic, MqttQoS qos, boolean retained) throws UnsupportedEncodingException {
         publishToAs(m_channel, clientId, topic, qos, retained);
     }
 
-    protected void publishToAs(EmbeddedChannel channel, String clientId, String topic, MqttQoS qos, boolean retained) {
+    protected void publishToAs(EmbeddedChannel channel, String clientId, String topic, MqttQoS qos, boolean retained) throws UnsupportedEncodingException {
         NettyUtils.userName(channel, clientId);
         MqttPublishMessage publish = MqttMessageBuilders.publish()
             .topicName(topic)
@@ -185,17 +186,17 @@ abstract class AbstractProtocolProcessorCommonUtils {
         this.m_processor.processPublish(m_channel, publish);
     }
 
-    protected void publishToAs(String clientId, String topic, MqttQoS qos, int messageId, boolean retained) {
+    protected void publishToAs(String clientId, String topic, MqttQoS qos, int messageId, boolean retained) throws UnsupportedEncodingException {
         publishToAs(this.m_channel, clientId, topic, qos, messageId, retained);
     }
 
     protected void publishToAs(EmbeddedChannel channel, String clientId, String topic, MqttQoS qos, int messageId,
-                               boolean retained) {
+                               boolean retained) throws UnsupportedEncodingException {
         publishToAs(channel, clientId, topic, HELLO_WORLD_MQTT, qos, messageId, retained);
     }
 
     protected void publishToAs(EmbeddedChannel channel, String clientId, String topic, String payload, MqttQoS qos,
-                               int messageId, boolean retained) {
+                               int messageId, boolean retained) throws UnsupportedEncodingException {
         NettyUtils.userName(channel, clientId);
         MqttPublishMessage publish = MqttMessageBuilders.publish()
             .topicName(topic)
@@ -207,12 +208,12 @@ abstract class AbstractProtocolProcessorCommonUtils {
     }
 
     protected void publishQoS2ToAs(EmbeddedChannel channel, String clientId, String topic, int messageId,
-                                   boolean retained) {
+                                   boolean retained) throws UnsupportedEncodingException {
         publishQoS2ToAs(channel, clientId, topic, HELLO_WORLD_MQTT, messageId, retained);
     }
 
     protected void publishQoS2ToAs(EmbeddedChannel channel, String clientId, String topic, String payload,
-                                   int messageId, boolean retained) {
+                                   int messageId, boolean retained) throws UnsupportedEncodingException {
         NettyUtils.userName(channel, clientId);
         MqttPublishMessage publish = MqttMessageBuilders.publish()
             .topicName(topic)

@@ -30,7 +30,7 @@ import static io.moquette.logging.LoggingUtils.getInterceptorIds;
 
 public class Server {
 
-    private static final Logger LOG = LoggerFactory.getLogger(io.moquette.server.Server.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private ScheduledExecutorService scheduler;
     private NewNettyAcceptor acceptor;

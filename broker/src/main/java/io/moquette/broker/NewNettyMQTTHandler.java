@@ -32,7 +32,7 @@ import static io.netty.channel.ChannelFutureListener.CLOSE_ON_FAILURE;
 @Sharable
 public class NewNettyMQTTHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NewNettyMQTTHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private static final String ATTR_CONNECTION = "connection";
     private static final AttributeKey<Object> ATTR_KEY_CONNECTION = AttributeKey.valueOf(ATTR_CONNECTION);

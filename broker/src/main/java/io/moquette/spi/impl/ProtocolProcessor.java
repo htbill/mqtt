@@ -16,6 +16,7 @@
 
 package io.moquette.spi.impl;
 
+import io.moquette.BrokerConstants;
 import io.moquette.connections.IConnectionsManager;
 import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.messages.InterceptAcknowledgedMessage;
@@ -27,6 +28,7 @@ import io.moquette.spi.EnqueuedMessage;
 import io.moquette.spi.IMessagesStore;
 import io.moquette.spi.IMessagesStore.StoredMessage;
 import io.moquette.spi.ISessionsStore;
+import io.moquette.spi.Utils.DataStatistics;
 import io.moquette.spi.impl.subscriptions.ISubscriptionsDirectory;
 import io.moquette.spi.impl.subscriptions.Subscription;
 import io.moquette.spi.impl.subscriptions.Topic;
@@ -65,7 +67,7 @@ public class ProtocolProcessor {
         STORED, VERIFIED
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(ProtocolProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private IConnectionsManager connectionDescriptors;
     private ConcurrentMap<RunningSubscription, SubscriptionState> subscriptionInCourse;
@@ -352,6 +354,7 @@ public class ProtocolProcessor {
         }
 
         String username = NettyUtils.userName(channel);
+        LOG.info(BrokerConstants.Device_Online_msg, clientID, DataStatistics.DeviceStatus.Unonline,System.currentTimeMillis() ,username,BrokerConstants.cluster_name,DataStatistics.ONlineStatus.SUC,"");
         m_interceptor.notifyClientConnectionLost(clientID, username);
     }
 

@@ -16,8 +16,10 @@
 
 package io.moquette.server;
 
+
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
 import com.hazelcast.config.ClasspathXmlConfig;
 import com.hazelcast.config.Config;
@@ -31,10 +33,12 @@ import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.hazelcastHandler.HazelcastInterceptHandler;
 import io.moquette.interception.hazelcastHandler.HazelcastListener;
 import io.moquette.interception.hazelcastHandler.HazelcastMsg;
+import io.moquette.logging.LoggingUtils;
 import io.moquette.server.config.*;
 import io.moquette.server.netty.NettyAcceptor;
 import io.moquette.spi.Utils.DataStatistics;
 import io.moquette.spi.Utils.kafkaProducerMsg;
+import io.moquette.spi.Utils.kafkabean;
 import io.moquette.spi.impl.ProtocolProcessor;
 import io.moquette.spi.impl.ProtocolProcessorBootstrapper;
 import io.moquette.spi.impl.subscriptions.Subscription;
@@ -51,6 +55,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+
 import static io.moquette.logging.LoggingUtils.getInterceptorIds;
 
 /**
@@ -58,7 +63,7 @@ import static io.moquette.logging.LoggingUtils.getInterceptorIds;
  */
 public class Server {
 
-    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
+    private static final Logger LOG = LoggerFactory.getLogger("DeviceLog_log");
 
     private ServerAcceptor m_acceptor;
 
@@ -69,7 +74,7 @@ public class Server {
 
     private ProtocolProcessorBootstrapper m_processorBootstrapper;
 
-    private ScheduledExecutorService scheduler;
+    private static ScheduledExecutorService scheduler;
     private HazelcastInstance hazelcastInstance;
     public HazelcastInstance getHazelcastInstance(){
         return hazelcastInstance;
@@ -91,6 +96,20 @@ public class Server {
         System.out.println("Server started, version 0.12-SNAPSHOT");
         //Bind  a shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(server::stopServer));
+    }
+    private static void initLogback(String url) throws Exception{
+
+        File file = new File(url, IConfig.DEFAULT_LOHBACK_CONFIG);
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        JoranConfigurator joranConfigurator = new JoranConfigurator();
+        joranConfigurator.setContext(loggerContext);
+        loggerContext.reset();
+        try {
+            joranConfigurator.doConfigure(file);
+        } catch (Exception e) {
+            throw new Exception("参数配置异常："+e.getMessage());
+        }
+        StatusPrinter.printInCaseOfErrorsOrWarnings(loggerContext);
     }
 
     /**
@@ -123,19 +142,7 @@ public class Server {
         final IConfig config = new ResourceLoaderConfig(filesystemLoader);
         startServer(config);
     }
-    private static void initLogback(String url) throws Exception{
-        File file = new File( url);
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-        JoranConfigurator joranConfigurator = new JoranConfigurator();
-        joranConfigurator.setContext(loggerContext);
-        loggerContext.reset();
-        try {
-            joranConfigurator.doConfigure(file);
-        } catch (Exception e) {
-            throw new Exception("参数配置异常："+e.getMessage());
-        }
-        StatusPrinter.printInCaseOfErrorsOrWarnings(loggerContext);
-    }
+
     /**
      * Starts the server with the given properties.
      * <p>
@@ -189,6 +196,7 @@ public class Server {
         LOG.trace("Starting Moquette Server. MQTT message interceptors={}", getInterceptorIds(handlers));
 
         scheduler = Executors.newScheduledThreadPool(1);
+
         final String clustername = config.getProperty(BrokerConstants.clustername);
         if (clustername == null) {
             throw new Exception("clustername is not set");
@@ -332,7 +340,8 @@ public class Server {
         return m_processor;
     }
 
-    public ScheduledExecutorService getScheduler() {
+    public static ScheduledExecutorService getScheduler() {
         return scheduler;
     }
+
 }

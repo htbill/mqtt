@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class AutoFlushHandler extends ChannelDuplexHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AutoFlushHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
     private static final long MIN_TIMEOUT_NANOS = TimeUnit.MILLISECONDS.toNanos(1);
 
     private final long writerIdleTimeNanos;

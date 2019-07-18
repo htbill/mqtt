@@ -20,7 +20,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import io.moquette.interception.InterceptHandler;
 
+
+
 public final class LoggingUtils {
+
+
+
 
     public static <T extends InterceptHandler> Collection<String> getInterceptorIds(Collection<T> handlers) {
         Collection<String> result = new ArrayList<>(handlers.size());
@@ -32,4 +37,5 @@ public final class LoggingUtils {
 
     private LoggingUtils() {
     }
+
 }

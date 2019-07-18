@@ -59,7 +59,7 @@ public final class EmbeddedLauncher {
 
         final Server mqttBroker = new Server();
         List<? extends InterceptHandler> userHandlers = Collections.singletonList(new PublisherListener());
-        mqttBroker.startServer(classPathConfig, userHandlers);
+        //mqttBroker.startServer(classPathConfig, userHandlers);
 
         System.out.println("Broker started press [CTRL+C] to stop");
         //Bind  a shutdown hook

@@ -26,7 +26,7 @@ import java.util.*;
 
 public class MemoryMessagesStore implements IMessagesStore {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MemoryMessagesStore.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private Map<Topic, StoredMessage> m_retainedStore = new HashMap<>();
 

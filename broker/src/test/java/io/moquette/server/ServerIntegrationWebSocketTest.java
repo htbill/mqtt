@@ -49,7 +49,11 @@ public class ServerIntegrationWebSocketTest {
         configProps
                 .put(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, Integer.toString(BrokerConstants.WEBSOCKET_PORT));
         m_config = new MemoryConfig(configProps);
-        m_server.startServer(m_config);
+        try {
+            m_server.startServer(m_config);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Before

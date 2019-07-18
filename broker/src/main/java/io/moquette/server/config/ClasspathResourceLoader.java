@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class ClasspathResourceLoader implements IResourceLoader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ClasspathResourceLoader.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private final String defaultResource;
     private final ClassLoader classLoader;

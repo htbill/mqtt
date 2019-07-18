@@ -16,7 +16,7 @@ import java.nio.ByteBuffer;
 import static io.netty.handler.codec.mqtt.MqttQoS.*;
 
 public class HazelcastListener implements MessageListener<HazelcastMsg> {
-    private static final Logger LOG = LoggerFactory.getLogger(HazelcastListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private final Server server;
     private final ConnectionDescriptorStore connectionDescriptors_;
@@ -28,7 +28,7 @@ public class HazelcastListener implements MessageListener<HazelcastMsg> {
     @Override
     public void onMessage(Message<HazelcastMsg> msg) {
         try {
-           // if (!msg.getPublishingMember().equals(server.getHazelcastInstance().getCluster().getLocalMember())) {
+            //if (!msg.getPublishingMember().equals(server.getHazelcastInstance().getCluster().getLocalMember())) {}
             switch (msg.getMessageObject().getMqttMessageType()){
                 case CONNECT:
                     LOG.info("{} received  connect from hazelcast for topic {} message: {}", msg.getMessageObject().getClientId(),

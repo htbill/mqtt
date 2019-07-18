@@ -1,5 +1,8 @@
 package io.moquette.spi.impl.BrokerMetrics;
 
+import io.moquette.server.Server;
+import io.moquette.server.netty.NettyAcceptor;
+import org.apache.kafka.common.protocol.types.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

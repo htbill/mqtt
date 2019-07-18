@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class ConnectionDescriptorStore implements IConnectionsManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ConnectionDescriptorStore.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private final ConcurrentMap<String, ConnectionDescriptor> connectionDescriptors;
 

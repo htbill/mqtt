@@ -38,9 +38,9 @@ import static io.moquette.spi.impl.ProtocolProcessor.asStoredMessage;
 
 class Qos0PublishHandler extends QosPublishHandler {
 
+    //private static final Logger LOG = LoggerFactory.getLogger(Qos0PublishHandler.class);
     private static final Logger LOG_data = LoggerFactory.getLogger("Device_Sensing_Data");
     private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
-
     private final IMessagesStore m_messagesStore;
     private final BrokerInterceptor m_interceptor;
     private final MessagesPublisher publisher;
@@ -58,15 +58,16 @@ class Qos0PublishHandler extends QosPublishHandler {
         // verify if topic can be write
         final Topic topic = new Topic(msg.variableHeader().topicName());
         if (topic.toString().startsWith(DataStatistics.PassThrough,0)){
+
             String clientID = NettyUtils.clientID(channel);
             String username = NettyUtils.userName(channel);
-
             byte[] req = new byte[msg.payload().readableBytes()];
             msg.payload().readBytes(req);
             kafkabean kafkabean_=kafkabean.getInstance(clientID,(new String(req,"UTF-8")),System.currentTimeMillis(),username);
             LOG_data.info(kafkabean_.tostrings());
             // kafkaProducerMsg.SendMessage(kafkabean_.tostrings());
-           // LOG.info("sending to kafka broker for topic {} message: {} take time:{}", topic, kafkabean_.data,end_-star_);
+
+            //LOG.info("sending to kafka broker for topic {} message: {} take time:{}", topic, kafkabean_.tostrings(),end_-star_);
         }else {
             String clientID = NettyUtils.clientID(channel);
             String username = NettyUtils.userName(channel);
@@ -81,10 +82,7 @@ class Qos0PublishHandler extends QosPublishHandler {
             IMessagesStore.StoredMessage toStoreMsg = asStoredMessage(msg);
             toStoreMsg.setClientID(clientID);
             //进行迭代二叉树进行传输
-
-
             this.publisher.publish2Subscribers(toStoreMsg, topic);
-
             if (msg.fixedHeader().isRetain()) {
                 // QoS == 0 && retain => clean old retained
                 m_messagesStore.cleanRetained(topic);

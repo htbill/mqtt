@@ -24,6 +24,7 @@ import io.moquette.BrokerConstants;
 public abstract class IConfig {
 
     public static final String DEFAULT_CONFIG = "config/moquette.conf";
+    public static final String DEFAULT_LOHBACK_CONFIG = "config/logback.xml";
 
     public abstract void setProperty(String name, String value);
 

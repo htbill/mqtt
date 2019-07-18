@@ -30,7 +30,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class FileResourceLoader implements IResourceLoader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FileResourceLoader.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private final File defaultFile;
     private final String parentPath;

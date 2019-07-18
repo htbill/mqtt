@@ -36,6 +36,7 @@ import io.moquette.spi.IStore;
 import io.moquette.spi.ISubscriptionsStore;
 import io.moquette.spi.Utils.C3p0ConnectPools;
 import io.moquette.spi.Utils.DataStatistics;
+import io.moquette.spi.impl.BrokerMetrics.Metriciml;
 import io.moquette.spi.impl.BrokerMetrics.Metricshandle;
 import io.moquette.spi.impl.security.*;
 import io.moquette.spi.impl.subscriptions.CTrieSubscriptionDirectory;
@@ -119,7 +120,6 @@ public class ProtocolProcessorBootstrapper {
         if (boolStarjdbcpool!=null){
             try {
                 new C3p0ConnectPools(props.getProperty(BrokerConstants.DB_AUTHENTICATOR_URL, ""),
-
                     props.getProperty(BrokerConstants.DB_Auth_sqlUsername, ""),
                     props.getProperty(BrokerConstants.DB_Auth_sqlpassword, ""),
                     props.getProperty(BrokerConstants.DB_AUTHENTICATOR_DRIVER, ""),
@@ -147,7 +147,7 @@ public class ProtocolProcessorBootstrapper {
             }
         };
 
-        LOG.info("Configuring message interceptors...");
+        LOG.info("A ResourcePool cannot acquire a new resource -- the factory or source appears to be down...");
 
 
         LOG.info("Initializing subscriptions store...");
@@ -194,29 +194,31 @@ public class ProtocolProcessorBootstrapper {
             LOG.info("An {} authorizator instance will be used", authorizator.getClass().getName());
         }
 
-        LOG.info("Initializing connection descriptor store...");
-        connectionDescriptors = new ConnectionDescriptorStore();
         final String useFineMetrics = props.getProperty(METRICS_ENABLE_PROPERTY_NAME);
         if (useFineMetrics!=null) {
-            this.Metriciml=loadClass(useFineMetrics, Metricshandle.class, Server.class, server);
-            if (this.Metriciml!=null){
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        try {
-                            Metriciml.BrokerActiveCOUNT(cluster_name, DataStatistics.ActiveCount.get(),DataStatistics.OnlineCount.get(),DataStatistics.UnlineCount.get(), C3p0ConnectPools.getConnection());
-                            Metriciml.BrokerPublishSubMsgSize(cluster_name,DataStatistics.PublishSize.get(),DataStatistics.SUBSize.get(), C3p0ConnectPools.getConnection());
-                        } catch (SQLException e) {
-                            //e.printStackTrace();
-                        }
+             this.Metriciml=loadClass(useFineMetrics, Metricshandle.class, Server.class, server);
+             if (this.Metriciml!=null){
+                 timer.schedule(new TimerTask() {
+                     @Override
+                     public void run() {
+                         try {
+                             Metriciml.BrokerActiveCOUNT(cluster_name, DataStatistics.ActiveCount.get(),DataStatistics.OnlineCount.get(),DataStatistics.UnlineCount.get(), C3p0ConnectPools.getConnection());
+                             Metriciml.BrokerPublishSubMsgSize(cluster_name,DataStatistics.PublishSize.get(),DataStatistics.SUBSize.get(), C3p0ConnectPools.getConnection());
+                         } catch (SQLException e) {
+                             //e.printStackTrace();
+                         }
 
-                    }
-                },1000,30000);
+                     }
+                 },1000,30000);
+             }
+
+
+
             }
 
 
-
-        }
+        LOG.info("Initializing connection descriptor store...");
+        connectionDescriptors = new ConnectionDescriptorStore();
 
         //启动集群通信
         if (props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster) !=null && props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_Cluster).equals("true")) {
@@ -286,6 +288,7 @@ public class ProtocolProcessorBootstrapper {
 
         final Constructor<? extends IStore> constructor;
         try {
+            //注明构造函数的类型
             constructor = storageClass
                 .getConstructor(IConfig.class, ScheduledExecutorService.class);
         } catch (NoSuchMethodException nsmex) {
@@ -293,6 +296,7 @@ public class ProtocolProcessorBootstrapper {
             return null;
         }
         try {
+            //
             return constructor.newInstance(props, scheduledExecutor);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
             LOG.error("Cannot instantiate the " + storageClassName + " instance", ex);

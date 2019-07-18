@@ -17,7 +17,7 @@ import static io.netty.handler.codec.mqtt.MqttQoS.FAILURE;
 
 final class Authorizator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Authorizator.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
 
     private final IAuthorizatorPolicy policy;
 

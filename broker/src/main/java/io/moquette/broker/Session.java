@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 class Session {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Session.class);
+    private static final Logger LOG = LoggerFactory.getLogger("STDOUT");
     private static final int FLIGHT_BEFORE_RESEND_MS = 5_000;
     private static final int INFLIGHT_WINDOW_SIZE = 10;
 

@@ -51,7 +51,11 @@ public class ServerLowlevelMessagesIntegrationTests {
         m_server = new Server();
         final Properties configProps = IntegrationUtils.prepareTestProperties();
         m_config = new MemoryConfig(configProps);
-        m_server.startServer(m_config);
+        try {
+            m_server.startServer(m_config);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Before

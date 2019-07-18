@@ -6,7 +6,6 @@ public class DataStatistics {
 
     public static String PassThrough=null;
 
-
     public static AtomicLong OnlineCount=new AtomicLong();
     public static AtomicLong UnlineCount=new AtomicLong();
     public static AtomicLong ActiveCount=new AtomicLong();
